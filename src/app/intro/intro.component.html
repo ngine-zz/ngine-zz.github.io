@@ -1,0 +1,137 @@
+<div class="scene">
+
+  <!-- 1. 하늘 그라디언트 -->
+  <div class="sky"
+       [style.background]="skyGradient()"
+       [style.filter]="weatherSkyFilter()">
+  </div>
+
+  <!-- 2. 별 (밤·황혼) -->
+  @if (showStars()) {
+    <div class="stars">
+      @for (s of stars; track $index) {
+        <span class="star"
+              [class.star--large]="s.large"
+              [style.left.%]="s.x"
+              [style.top.%]="s.y"
+              [style.animation-delay.s]="s.delay">
+        </span>
+      }
+    </div>
+  }
+
+
+  <!-- 3. 구름 레이어 (하늘과 지형 사이) -->
+  <div class="clouds-layer">
+    <!-- cloud1: 큰 구름 — 3겹 사선 오버랩 -->
+    <div class="cloud-strip cloud-strip--1a"></div>
+    <div class="cloud-strip cloud-strip--1b"></div>
+    <div class="cloud-strip cloud-strip--1c"></div>
+    <!-- cloud2: 오른쪽 구름 — 3겹 사선 오버랩 -->
+    <div class="cloud-strip cloud-strip--2a"></div>
+    <div class="cloud-strip cloud-strip--2b"></div>
+    <div class="cloud-strip cloud-strip--2c"></div>
+  </div>
+
+  <!-- 4a. 흰꽃 레이어 — 지형과 분리, 화면 양 끝 고정, 좁은 화면 숨김 -->
+  <div class="white-flowers-layer">
+    <svg viewBox="0 0 400 172" preserveAspectRatio="none"
+         xmlns="http://www.w3.org/2000/svg">
+      @for (f of sceneWhiteFlowers; track $index) {
+        <rect class="flower-dot"
+              [attr.x]="f.x" [attr.y]="f.y - 2"
+              width="2" height="2"
+              [style.animation-delay.s]="f.d">
+        </rect>
+      }
+    </svg>
+  </div>
+
+  <!-- 4b. 지형 (하단 고정, 원본 비율 유지 — 하늘 픽셀 투명 처리) -->
+  <div class="landscape">
+    <div class="season-tint" [style.background]="seasonTint()"></div>
+
+    <!-- 노란 꽃술 있는 흰꽃 SVG 오버레이 -->
+    <svg class="grass-overlay"
+         viewBox="0 0 400 172" preserveAspectRatio="none"
+         xmlns="http://www.w3.org/2000/svg">
+      @for (f of sceneCompoundFlowers; track $index) {
+        <g class="flower-dot" [style.animation-delay.s]="f.d">
+          <rect [attr.x]="f.x - 1" [attr.y]="f.y - 2" width="3" height="3"
+                fill="rgba(249,244,235,0.92)"/>
+          <rect [attr.x]="f.x" [attr.y]="f.y - 1" width="1" height="1"
+                fill="#e4c94b"/>
+        </g>
+      }
+    </svg>
+
+    <!-- 풀·꽃 바람 흔들림 SVG 오버레이 -->
+    <svg class="grass-overlay"
+         viewBox="0 0 400 172"
+         preserveAspectRatio="none"
+         xmlns="http://www.w3.org/2000/svg">
+      @for (b of sceneGrass; track $index) {
+        <rect class="blade"
+              [attr.x]="b.x" [attr.y]="b.y - b.h"
+              width="1" [attr.height]="b.h"
+              [style.animation-delay.s]="b.d">
+        </rect>
+      }
+      @for (f of sceneFlowers; track $index) {
+        <line class="flower-dot"
+              [attr.x1]="f.x" [attr.y1]="f.y"
+              [attr.x2]="f.x" [attr.y2]="f.y - 3"
+              [attr.stroke]="f.c"
+              stroke-width="1"
+              [style.animation-delay.s]="f.d">
+        </line>
+      }
+    </svg>
+  </div>
+
+  <!-- 5. 비 -->
+  @if (showRain()) {
+    <div class="rain">
+      @for (d of rainDrops; track $index) {
+        <span class="drop"
+              [style.left.%]="d.left"
+              [style.animation-delay.s]="d.delay"
+              [style.animation-duration.s]="d.duration">
+        </span>
+      }
+    </div>
+  }
+
+  <!-- 7. 눈 -->
+  @if (showSnow()) {
+    <div class="snow">
+      @for (f of snowFlakes; track $index) {
+        <span class="flake"
+              [style.left.%]="f.left"
+              [style.width.px]="f.size"
+              [style.height.px]="f.size"
+              [style.animation-delay.s]="f.delay"
+              [style.animation-duration.s]="f.duration">
+        </span>
+      }
+    </div>
+  }
+
+  <!-- 8. 번개 -->
+  @if (showLightning()) {
+    <div class="lightning"></div>
+  }
+
+  <!-- 9. 시간대 앰비언트 오버레이 (확인용 임시 숨김) -->
+  <!-- <div class="ambient" [style.background]="ambientColor()"></div> -->
+
+  <!-- 10. 콘텐츠 (확인용 임시 숨김) -->
+  <!-- <div class="content">
+    <h1 class="title">S-FOOD</h1>
+    <p class="tagline">Better Food, Better World</p>
+    <button class="enter-btn" [routerLink]="'/village'">
+      Pixel Village 입장하기
+    </button>
+  </div> -->
+
+</div>

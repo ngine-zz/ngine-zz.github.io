@@ -1,0 +1,367 @@
+// ============================================================
+// Layout
+// ============================================================
+.scene {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+%layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+// ============================================================
+// 구름 레이어 — 픽셀아트 SVG 오브젝트, 수평 드리프트
+// 수직 위치: landscape(height=43vw)의 image y좌표 기준으로 계산
+//   bottom = (172 - image_y_bottom) / 172 × 43vw
+//   height = image_h / 172 × 43vw
+//   width  = image_w / 400 × 100vw
+// ============================================================
+.clouds-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+// ── 공통 스트립 설정 ──────────────────────────────────────
+// repeat-x 타일링 + 사선(translateX·Y 동시) 애니메이션
+// 타일 너비는 이미지 비율로 자동 결정(background-size: auto 100%)
+// ─────────────────────────────────────────────────────────
+.cloud-strip {
+  position: absolute;
+  left: 0;
+  width: 300vw;
+  image-rendering: pixelated;
+  background-repeat: repeat-x;
+  background-size: auto 100%;
+}
+
+// ── Cloud 1 (seamless 374×62px: original + h-flipped, bottom y=64+~17px → 23.5vw, height 15.5vw) ──
+// 타일 너비 = 374/400 × 100vw = 93.5vw → 1타일 이동 시 seamless loop
+// 속도: 93.5vw ÷ 0.3vw/s ≈ 312s
+.cloud-strip--1a {
+  height: 15.5vw;
+  bottom: 23.5vw;
+  background-image: url('/assets/intro-bg/cloud1-seamless.png');
+  background-position: 0 0;
+  animation: drift-1 312s linear infinite;
+}
+
+// 2번째 레이어: 30% 오프셋, Y 1.5vw 위 — 중간 속도
+.cloud-strip--1b {
+  height: 15.5vw;
+  bottom: 25vw;
+  background-image: url('/assets/intro-bg/cloud1-seamless.png');
+  background-position: -28vw 0;
+  animation: drift-1 430s linear infinite;
+  opacity: 0.75;
+}
+
+// 3번째 레이어: 60% 오프셋, Y 3vw 위 — 가장 느림
+.cloud-strip--1c {
+  height: 15.5vw;
+  bottom: 26.5vw;
+  background-image: url('/assets/intro-bg/cloud1-seamless.png');
+  background-position: -56vw 0;
+  animation: drift-1 600s linear infinite;
+  opacity: 0.5;
+}
+
+// ── Cloud 2 (seamless 254×50px: original + h-flipped, bottom y=51+~17px → 27vw, height 12.5vw) ──
+// 타일 너비 = 254/400 × 100vw = 63.5vw → 2타일 = 127vw 이동 시 seamless loop
+// 속도: 127vw ÷ 0.43vw/s ≈ 295s
+.cloud-strip--2a {
+  height: 12.5vw;
+  bottom: 27vw;
+  background-image: url('/assets/intro-bg/cloud2-seamless.png');
+  background-position: 0 0;
+  animation: drift-2 295s linear infinite;
+  animation-delay: -80s;
+}
+
+// 2번째 레이어 — 중간 속도
+.cloud-strip--2b {
+  height: 12.5vw;
+  bottom: 28vw;
+  background-image: url('/assets/intro-bg/cloud2-seamless.png');
+  background-position: -19vw 0;
+  animation: drift-2 410s linear infinite;
+  animation-delay: -110s;
+  opacity: 0.75;
+}
+
+// 3번째 레이어: 60% 오프셋, Y 1vw 위 — 가장 느림
+.cloud-strip--2c {
+  height: 12.5vw;
+  bottom: 29vw;
+  background-image: url('/assets/intro-bg/cloud2-seamless.png');
+  background-position: -38vw 0;
+  animation: drift-2 560s linear infinite;
+  animation-delay: -80s;
+  opacity: 0.5;
+}
+
+// 사선 이동: X(타일 배수)만큼 좌로, Y는 미세하게 위로
+@keyframes drift-1 {
+  from { transform: translate(0,       0);    }
+  to   { transform: translate(-93.5vw, -4vw); }
+}
+
+@keyframes drift-2 {
+  from { transform: translate(0,      0);    }
+  to   { transform: translate(-127vw, -3vw); }
+}
+
+// ============================================================
+// Sky — 전체 화면 기반 레이어
+// 지형 이미지의 투명 픽셀(하늘 영역)을 통해 비쳐 보임
+// ============================================================
+.sky {
+  @extend %layer;
+  transition: background 2s ease, filter 2s ease;
+}
+
+// ============================================================
+// Stars
+// ============================================================
+.stars {
+  @extend %layer;
+}
+
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: #fff;
+  border-radius: 50%;
+  animation: twinkle ease-in-out infinite 3s;
+
+  &--large {
+    width: 3px;
+    height: 3px;
+    animation-duration: 2.2s;
+  }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.15; }
+  50%       { opacity: 1; }
+}
+
+// ============================================================
+// 풍경 — 하단 고정, 원본 비율(400×172) 유지
+// 화면 너비에 따라 크기가 결정되고, 하늘은 그 위 나머지 공간을 채움
+// ============================================================
+.landscape {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  aspect-ratio: 400 / 172;
+  background-image: url('/assets/intro-bg/v10_AA_terrain.png');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  pointer-events: none;
+}
+
+// 흰꽃 레이어 — landscape와 동일한 크기/위치, 독립 레이어
+.white-flowers-layer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  aspect-ratio: 400 / 172;
+  pointer-events: none;
+  z-index: 2;
+
+  svg {
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+  }
+
+  @media (max-width: 640px) {
+    display: none;
+  }
+}
+
+.grass-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  image-rendering: pixelated;
+}
+
+.season-tint {
+  position: absolute;
+  inset: 0;
+  mix-blend-mode: multiply;
+  transition: background 3s ease;
+}
+
+// 풀잎 — 1px 폭 rect, 수평 이동으로 흔들림
+.blade {
+  fill: #7a922b;
+  animation: sway-blade 4s ease-in-out infinite;
+}
+
+@keyframes sway-blade {
+  0%, 100% { transform: translateX(0); }
+  25%       { transform: translateX(1px); }
+  75%       { transform: translateX(-1px); }
+}
+
+// 꽃 공통 — stroke는 각 요소의 attribute로 제어
+.flower-dot {
+  fill: none;
+  animation: sway-flower 5s ease-in-out infinite;
+}
+
+// 흰꽃 레이어 전용 fill
+.white-flowers-layer rect {
+  fill: rgba(248, 244, 232, 0.9);
+}
+
+@keyframes sway-flower {
+  0%, 100% { transform: translateX(0); }
+  25%       { transform: translateX(1px); }
+  75%       { transform: translateX(-1px); }
+}
+
+// 계절 틴트 (SVG 내부, mix-blend-mode: multiply)
+.season-tint-rect {
+  mix-blend-mode: multiply;
+  transition: fill 3s ease;
+  pointer-events: none;
+}
+
+// ============================================================
+// Rain
+// ============================================================
+.rain {
+  @extend %layer;
+}
+
+.drop {
+  position: absolute;
+  top: -20px;
+  width: 2px;
+  height: 14px;
+  background: rgba(180, 215, 245, 0.65);
+  border-radius: 1px;
+  animation: fall-rain linear infinite;
+}
+
+@keyframes fall-rain {
+  from { transform: translateY(-20px) rotate(12deg); opacity: 0; }
+  5%   { opacity: 1; }
+  to   { transform: translateY(105vh) rotate(12deg); opacity: 0.4; }
+}
+
+// ============================================================
+// Snow
+// ============================================================
+.snow {
+  @extend %layer;
+}
+
+.flake {
+  position: absolute;
+  top: -8px;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 50%;
+  animation: fall-snow ease-in-out infinite;
+}
+
+@keyframes fall-snow {
+  0%   { transform: translateY(-8px) translateX(0);    opacity: 0; }
+  8%   { opacity: 1; }
+  45%  { transform: translateY(45vh) translateX(18px); }
+  100% { transform: translateY(102vh) translateX(-12px); opacity: 0.2; }
+}
+
+// ============================================================
+// Lightning
+// ============================================================
+.lightning {
+  @extend %layer;
+  background: rgba(255, 255, 255, 0.95);
+  opacity: 0;
+  animation: flash 7s steps(1) infinite;
+}
+
+@keyframes flash {
+  0%     { opacity: 0; }
+  91%    { opacity: 0; }
+  91.5%  { opacity: 0.9; }
+  92%    { opacity: 0; }
+  92.8%  { opacity: 0.55; }
+  93%    { opacity: 0; }
+  100%   { opacity: 0; }
+}
+
+// ============================================================
+// Ambient overlay (전체 씬 위에 시간대 광원 적용)
+// ============================================================
+.ambient {
+  @extend %layer;
+  transition: background 2s ease;
+}
+
+// ============================================================
+// Content
+// ============================================================
+.content {
+  @extend %layer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.title {
+  margin: 0;
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(1.8rem, 5vw, 4rem);
+  color: #fff;
+  text-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.05em;
+}
+
+.tagline {
+  margin: 0;
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(0.45rem, 1.1vw, 0.8rem);
+  color: rgba(255, 255, 255, 0.75);
+  letter-spacing: 0.12em;
+}
+
+.enter-btn {
+  pointer-events: all;
+  margin-top: 40px;
+  padding: 14px 36px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.75rem;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: background 0.2s, border-color 0.2s;
+  letter-spacing: 0.05em;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.24);
+    border-color: #fff;
+  }
+}
