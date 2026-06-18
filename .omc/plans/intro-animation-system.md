@@ -73,38 +73,43 @@ SKY = set()  # #d0f3f7, #daf0f6, #e3f4f9, #e7f1f3, #f1f7fa, #fafbfa
 
 ### 3-2. 심리스 타일 생성
 
+4분면 방식으로 수평 seamless + 높이 2배를 동시에 달성:
+
 ```
-cloud1-seamless.png = [cloud1.png | h-flip(cloud1.png)]  → 374×62px
-cloud2-seamless.png = [cloud2.png | h-flip(cloud2.png)]  → 254×50px
+cloud1-seamless.png:
+  [ cloud1.png       | h-flip(cloud1.png) ]   → 상단 62px
+  [ h-flip(cloud1.png) | cloud1.png       ]   → 하단 62px
+  최종: 374×124px
+
+cloud2-seamless.png: 동일 방식 → 254×100px  (참고용 보존, 현재 미사용)
 ```
 
-좌우 반전 이미지를 나란히 붙이면 타일 경계가 자연스럽게 이어진다.
+- 수평 seamless: 각 row가 `[orig|hflip]` 또는 `[hflip|orig]` 구조라 타일 경계 자연스러움
+- 높이 2배: 구름이 상하 대칭으로 더 볼륨감 있게 보임
 
 ### 3-3. CSS 스트립 배치
 
-각 구름 타입별 3겹 레이어, 각 레이어마다 다른 속도:
+cloud1 단일 그룹, 3겹 레이어:
 
 ```
-              opacity   bottom    속도
-cloud-strip--1a  1.0   23.5vw   312s  ─┐
-cloud-strip--1b  0.75  25vw     430s   │ 사선 드리프트
-cloud-strip--1c  0.5   26.5vw  600s  ─┘ translate(-X, -Y)
-
-cloud-strip--2a  1.0   27vw    295s
-cloud-strip--2b  0.75  28vw    410s
-cloud-strip--2c  0.5   29vw    560s
+              opacity   bottom   height   속도
+cloud-strip--1a  1.0    3vw     31vw    312s  ─┐
+cloud-strip--1b  0.45   9.5vw   31vw    430s   │ 사선 드리프트
+cloud-strip--1c  0.25   11vw    31vw    600s  ─┘ translate(-X, -Y)
 ```
 
 **원칙:**
 - `width: 300vw` — element가 뷰포트 오른쪽 끝에서 잘리지 않도록
 - `background-repeat: repeat-x` + `background-size: auto 100%`
 - 애니메이션: `translate(-N×tile_width, -Yvw)` — 정확한 타일 배수만큼 이동 시 seamless loop
+- bottom 값: 원래 구름(상단 절반)의 시각적 위치를 기준으로 `bottom = 원래top - height` 계산
+- cloud2 그룹(2a/2b/2c) 및 `drift-2` keyframe 제거됨
 
 ### 3-4. 타일 폭 계산
 
 ```
 cloud1-seamless: 374/400 × 100vw = 93.5vw → drift-1: translate(-93.5vw, -4vw)
-cloud2-seamless: 254/400 × 100vw = 63.5vw → 2타일 = 127vw → drift-2: translate(-127vw, -3vw)
+(cloud2-seamless: 254/400 × 100vw = 63.5vw → 미사용)
 ```
 
 ---
