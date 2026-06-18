@@ -1,0 +1,4 @@
+{"t":0,"agent":"system","event":"skill_invoked","skill_name":"oh-my-claudecode:omc-reference"}
+{"t":0,"agent":"ac4bf1f","agent_type":"unknown","event":"agent_stop","success":true,"duration_ms":0}
+{"t":0,"agent":"a3a1e6f","agent_type":"unknown","event":"agent_stop","success":true,"duration_ms":0}
+{"t":0,"agent":"a71cb98","agent_type":"unknown","event":"agent_stop","success":true,"duration_ms":0}

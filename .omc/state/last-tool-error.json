@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"CLAUDECODE= claude plugin marketplace refresh omc 2>&1\",\"timeout\":60000,\"description\":\"Refresh omc marketplace cache\"}",
+  "error": "Exit code 1\nerror: unknown command 'refresh'",
+  "timestamp": "2026-06-18T00:33:00.270Z",
+  "retry_count": 4
+}

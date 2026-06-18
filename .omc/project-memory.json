@@ -1,0 +1,138 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1781742686115,
+  "projectRoot": "/Users/Marc/Desktop/Website",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      },
+      {
+        "name": "TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "tsconfig.json"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "@angular/core",
+        "version": "22.0.0",
+        "category": "frontend"
+      },
+      {
+        "name": "vitest",
+        "version": "4.0.8",
+        "category": "testing"
+      }
+    ],
+    "packageManager": "npm",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": "npm run build",
+    "testCommand": "npm test",
+    "lintCommand": null,
+    "devCommand": "npm run start",
+    "scripts": {
+      "ng": "ng",
+      "start": "ng serve",
+      "build": "ng build",
+      "watch": "ng build --watch --configuration development",
+      "test": "ng test",
+      "assets": "node scripts/assets.js sync",
+      "assets:status": "node scripts/assets.js status",
+      "assets:watch": "node scripts/assets.js watch",
+      "assets:force": "node scripts/assets.js sync --force"
+    }
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": "ES modules",
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "public",
+      "scripts",
+      "src"
+    ],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "dist": {
+      "path": "dist",
+      "purpose": "Distribution/build output",
+      "fileCount": 0,
+      "lastAccessed": 1781742683032,
+      "keyFiles": []
+    },
+    "public": {
+      "path": "public",
+      "purpose": "Public files",
+      "fileCount": 1,
+      "lastAccessed": 1781742683036,
+      "keyFiles": [
+        "favicon.ico"
+      ]
+    },
+    "scripts": {
+      "path": "scripts",
+      "purpose": "Build/utility scripts",
+      "fileCount": 1,
+      "lastAccessed": 1781742684747,
+      "keyFiles": [
+        "assets.js"
+      ]
+    },
+    "src": {
+      "path": "src",
+      "purpose": "Source code",
+      "fileCount": 3,
+      "lastAccessed": 1781742684747,
+      "keyFiles": [
+        "index.html",
+        "main.ts",
+        "styles.scss"
+      ]
+    },
+    "public/assets": {
+      "path": "public/assets",
+      "purpose": "Static assets",
+      "fileCount": 0,
+      "lastAccessed": 1781742684750,
+      "keyFiles": []
+    },
+    "src/app": {
+      "path": "src/app",
+      "purpose": "Application code",
+      "fileCount": 6,
+      "lastAccessed": 1781742684751,
+      "keyFiles": [
+        "app.config.ts",
+        "app.html",
+        "app.routes.ts"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": ".claude/skills/run-website/SKILL.md",
+      "accessCount": 2,
+      "lastAccessed": 1781744564856,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}
