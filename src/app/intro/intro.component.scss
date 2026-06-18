@@ -39,12 +39,12 @@
   background-size: auto 100%;
 }
 
-// ── Cloud 1 (seamless 374×62px: original + h-flipped, bottom y=64+~17px → 23.5vw, height 15.5vw) ──
+// ── Cloud 1 (seamless 374×124px: 4-quadrant tile, height 31vw = 2×15.5vw) ──
 // 타일 너비 = 374/400 × 100vw = 93.5vw → 1타일 이동 시 seamless loop
 // 속도: 93.5vw ÷ 0.3vw/s ≈ 312s
 .cloud-strip--1a {
-  height: 15.5vw;
-  bottom: 23.5vw;
+  height: 31vw;
+  bottom: 8vw;
   background-image: url('/assets/intro-bg/cloud1-seamless.png');
   background-position: 0 0;
   animation: drift-1 312s linear infinite;
@@ -52,8 +52,8 @@
 
 // 2번째 레이어: 30% 오프셋, Y 1.5vw 위 — 중간 속도
 .cloud-strip--1b {
-  height: 15.5vw;
-  bottom: 25vw;
+  height: 31vw;
+  bottom: 9.5vw;
   background-image: url('/assets/intro-bg/cloud1-seamless.png');
   background-position: -28vw 0;
   animation: drift-1 430s linear infinite;
@@ -62,45 +62,11 @@
 
 // 3번째 레이어: 60% 오프셋, Y 3vw 위 — 가장 느림
 .cloud-strip--1c {
-  height: 15.5vw;
-  bottom: 26.5vw;
+  height: 31vw;
+  bottom: 11vw;
   background-image: url('/assets/intro-bg/cloud1-seamless.png');
   background-position: -56vw 0;
   animation: drift-1 600s linear infinite;
-  opacity: 0.5;
-}
-
-// ── Cloud 2 (seamless 254×50px: original + h-flipped, bottom y=51+~17px → 27vw, height 12.5vw) ──
-// 타일 너비 = 254/400 × 100vw = 63.5vw → 2타일 = 127vw 이동 시 seamless loop
-// 속도: 127vw ÷ 0.43vw/s ≈ 295s
-.cloud-strip--2a {
-  height: 12.5vw;
-  bottom: 27vw;
-  background-image: url('/assets/intro-bg/cloud2-seamless.png');
-  background-position: 0 0;
-  animation: drift-2 295s linear infinite;
-  animation-delay: -80s;
-}
-
-// 2번째 레이어 — 중간 속도
-.cloud-strip--2b {
-  height: 12.5vw;
-  bottom: 28vw;
-  background-image: url('/assets/intro-bg/cloud2-seamless.png');
-  background-position: -19vw 0;
-  animation: drift-2 410s linear infinite;
-  animation-delay: -110s;
-  opacity: 0.75;
-}
-
-// 3번째 레이어: 60% 오프셋, Y 1vw 위 — 가장 느림
-.cloud-strip--2c {
-  height: 12.5vw;
-  bottom: 29vw;
-  background-image: url('/assets/intro-bg/cloud2-seamless.png');
-  background-position: -38vw 0;
-  animation: drift-2 560s linear infinite;
-  animation-delay: -80s;
   opacity: 0.5;
 }
 
@@ -108,11 +74,6 @@
 @keyframes drift-1 {
   from { transform: translate(0,       0);    }
   to   { transform: translate(-93.5vw, -4vw); }
-}
-
-@keyframes drift-2 {
-  from { transform: translate(0,      0);    }
-  to   { transform: translate(-127vw, -3vw); }
 }
 
 // ============================================================
