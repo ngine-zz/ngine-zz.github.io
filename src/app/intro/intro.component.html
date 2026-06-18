@@ -33,10 +33,11 @@
     <div class="cloud-strip cloud-strip--2c"></div>
   </div>
 
-  <!-- 4a. 흰꽃 레이어 — 지형과 분리, 화면 양 끝 고정, 좁은 화면 숨김 -->
+  <!-- 4a. 흰꽃 레이어 — 지형과 완전 분리, 화면 양 끝 고정, 좁은 화면 숨김 -->
   <div class="white-flowers-layer">
     <svg viewBox="0 0 400 172" preserveAspectRatio="none"
          xmlns="http://www.w3.org/2000/svg">
+      <!-- 단순 흰꽃 (2×2) -->
       @for (f of sceneWhiteFlowers; track $index) {
         <rect class="flower-dot"
               [attr.x]="f.x" [attr.y]="f.y - 2"
@@ -44,17 +45,7 @@
               [style.animation-delay.s]="f.d">
         </rect>
       }
-    </svg>
-  </div>
-
-  <!-- 4b. 지형 (하단 고정, 원본 비율 유지 — 하늘 픽셀 투명 처리) -->
-  <div class="landscape">
-    <div class="season-tint" [style.background]="seasonTint()"></div>
-
-    <!-- 노란 꽃술 있는 흰꽃 SVG 오버레이 -->
-    <svg class="grass-overlay"
-         viewBox="0 0 400 172" preserveAspectRatio="none"
-         xmlns="http://www.w3.org/2000/svg">
+      <!-- 복합 꽃 (흰 꽃잎 3×3 + 노란 꽃술 1×1) -->
       @for (f of sceneCompoundFlowers; track $index) {
         <g class="flower-dot" [style.animation-delay.s]="f.d">
           <rect [attr.x]="f.x - 1" [attr.y]="f.y - 2" width="3" height="3"
@@ -64,6 +55,11 @@
         </g>
       }
     </svg>
+  </div>
+
+  <!-- 4b. 지형 (하단 고정, 원본 비율 유지 — 하늘 픽셀 투명 처리) -->
+  <div class="landscape">
+    <div class="season-tint" [style.background]="seasonTint()"></div>
 
     <!-- 풀·꽃 바람 흔들림 SVG 오버레이 -->
     <svg class="grass-overlay"
