@@ -293,6 +293,24 @@
   bottom: 12vw;
 }
 
+.cow-sitting-wrap {
+  position: absolute;
+  pointer-events: none;
+  z-index: 7;
+  left: 31%;
+  bottom: 7.5vw;
+}
+
+.cow-sitting {
+  display: block;
+  width: 6.5vw;
+  height: 6.5vw;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  transform: scale(1.25);
+  transform-origin: bottom center;
+}
+
 // ============================================================
 // Rain / Snow / Lightning — z-index: 8
 // ============================================================
