@@ -114,6 +114,13 @@ export class IntroComponent implements OnInit, OnDestroy {
   );
   private calfTimer?: ReturnType<typeof setInterval>;
 
+  // 잠자는 소 애니메이션 (9프레임 z Z Z)
+  readonly sleepingCowFrame    = signal(0);
+  readonly sleepingCowFrameSrc = computed(() =>
+    `/assets/intro-bg/cow/sleeping-cow-sw-${this.sleepingCowFrame()}.png`
+  );
+  private sleepingCowTimer?: ReturnType<typeof setInterval>;
+
   // 나비 시퀀스
   readonly butterflyPhase    = signal<ButterflyPhase>('hidden');
   readonly butterflyFrame    = signal(0);
@@ -158,12 +165,16 @@ export class IntroComponent implements OnInit, OnDestroy {
     this.calfTimer = setInterval(() => {
       this.calfWalkFrame.update(f => (f + 1) % 9);
     }, 220);
+    this.sleepingCowTimer = setInterval(() => {
+      this.sleepingCowFrame.update(f => (f + 1) % 9);
+    }, 200);
     this.butterflySeqTimer = setTimeout(() => this.runButterflySequence(), 2000);
   }
 
   ngOnDestroy() {
     clearInterval(this.timer);
     clearInterval(this.calfTimer);
+    clearInterval(this.sleepingCowTimer);
     clearInterval(this.butterflyFlyTimer);
     clearTimeout(this.butterflySeqTimer);
     this.clearSittingIdle();
@@ -188,9 +199,9 @@ export class IntroComponent implements OnInit, OnDestroy {
           this.stopWingFlap();
           this.butterflyPhase.set('hidden');
           this.butterflySeqTimer = setTimeout(() => this.runButterflySequence(), 5000);
-        }, 4000);
+        }, 6000);
       }, 5000);
-    }, 10000);
+    }, 14000);
   }
 
   private startWingFlap() {
