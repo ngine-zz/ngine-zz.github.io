@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>S-Food Pixel Village — 전체 배경 후보</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0d0d0d; color: #eee; font-family: sans-serif; padding: 24px; }
+  h2 { font-size: 11px; color: #555; margin: 36px 0 10px; text-transform: uppercase; letter-spacing: 2px; border-bottom: 1px solid #1e1e1e; padding-bottom: 6px; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .card { background: #161616; border-radius: 6px; overflow: hidden; border: 2px solid transparent; cursor: pointer; transition: border-color .15s; }
+  .card:hover { border-color: #f5d87a; }
+  .card.pick { border-color: #4caf50; }
+  .card.skip { opacity: 0.35; }
+  .card img { width: 100%; display: block; image-rendering: pixelated; }
+  .label { padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; }
+  .label span { font-size: 12px; color: #999; }
+  .label small { font-size: 10px; color: #444; }
+  .badge { font-size: 9px; padding: 2px 6px; border-radius: 3px; color: #fff; }
+  .g { background: #4caf50; }
+  .b { background: #3a6ea5; }
+  .r { background: #c0392b; }
+</style>
+</head>
+<body>
+
+<h2>🆕 v10_A_rocky — v10_A + v3_C 암봉 직접 합성</h2>
+<div class="grid">
+  <div class="card" style="border-color:#555"><img src="v10_A.png"><div class="label"><span>v10_A (원본)</span><span class="badge b">베이스</span></div></div>
+  <div class="card" style="border-color:#555"><img src="v3_C.png"><div class="label"><span>v3_C (암봉 소스)</span><span class="badge b">소스</span></div></div>
+  <div class="card pick"><img src="v10_A_rocky.png"><div class="label"><span>v10_A_rocky</span><span class="badge g">합성</span></div></div>
+</div>
+
+<h2>v11 — v10_A + 정상부 암봉 (edit-image)</h2>
+<div style="margin-bottom:8px;font-size:11px;color:#666;">guidance A=5.0 / B=6.0 / C=7.0</div>
+<div class="grid">
+  <div class="card" style="border-color:#555"><img src="v10_A.png"><div class="label"><span>v10_A (원본)</span><span class="badge b">베이스</span></div></div>
+  <div class="card"><img src="v11_A.png"><div class="label"><span>v11_A</span><small>guidance 5.0</small></div></div>
+  <div class="card"><img src="v11_B.png"><div class="label"><span>v11_B</span><small>guidance 6.0</small></div></div>
+  <div class="card"><img src="v11_C.png"><div class="label"><span>v11_C</span><small>guidance 7.0</small></div></div>
+</div>
+
+<h2>🆕 v10 — 목장 전경 주인공 (잔디·꽃·나무 + 원경 산)</h2>
+<div class="grid">
+  <div class="card"><img src="v10_A.png"><div class="label"><span>v10_A</span></div></div>
+  <div class="card"><img src="v10_B.png"><div class="label"><span>v10_B</span></div></div>
+  <div class="card"><img src="v10_C.png"><div class="label"><span>v10_C</span></div></div>
+</div>
+
+<h2>v9 — 목장 전경 강화 + 정상부 암봉</h2>
+<div class="grid">
+  <div class="card"><img src="v9_A.png"><div class="label"><span>v9_A</span></div></div>
+  <div class="card"><img src="v9_B.png"><div class="label"><span>v9_B</span></div></div>
+  <div class="card"><img src="v9_C.png"><div class="label"><span>v9_C</span></div></div>
+</div>
+
+<h2>v8 — 새벽 + 정상부 암봉 왕관 구조 (신규 프롬프트)</h2>
+<div class="grid">
+  <div class="card"><img src="v8_A.png"><div class="label"><span>v8_A</span></div></div>
+  <div class="card"><img src="v8_B.png"><div class="label"><span>v8_B</span></div></div>
+  <div class="card"><img src="v8_C.png"><div class="label"><span>v8_C</span></div></div>
+</div>
+
+<h2>v7 — v2_dawn 원경 암봉 추가 시도 (edit-image API)</h2>
+<div style="margin-bottom:8px;font-size:11px;color:#666;">좌: 원본 v2_dawn / 우: 편집본 — guidance A=5.0 / B=6.0 / C=4.0</div>
+<div class="grid">
+  <div class="card" style="border-color:#555"><img src="v2_dawn.png"><div class="label"><span>v2_dawn (원본)</span><span class="badge b">레퍼런스</span></div></div>
+  <div class="card"><img src="v7_A.png"><div class="label"><span>v7_A</span><small>guidance 5.0</small></div></div>
+  <div class="card"><img src="v7_B.png"><div class="label"><span>v7_B</span><small>guidance 6.0</small></div></div>
+  <div class="card"><img src="v7_C.png"><div class="label"><span>v7_C</span><small>guidance 4.0</small></div></div>
+</div>
+
+<h2>✅ v3 — 설악산 레이아웃 (현재 채택: v3_C)</h2>
+<div class="grid">
+  <div class="card"><img src="v3_A.png"><div class="label"><span>v3_A</span><small>단일봉·구름 베이킹</small></div></div>
+  <div class="card"><img src="v3_B.png"><div class="label"><span>v3_B</span><small>알프스 느낌</small></div></div>
+  <div class="card pick"><img src="v3_C.png"><div class="label"><span>v3_C</span><span class="badge g">채택</span></div></div>
+</div>
+
+<h2>v2 — 날씨 레퍼런스</h2>
+<div class="grid">
+  <div class="card"><img src="v2_day.png"><div class="label"><span>v2_day ☀️</span></div></div>
+  <div class="card"><img src="v2_sunset.png"><div class="label"><span>v2_sunset 🌅</span></div></div>
+  <div class="card"><img src="v2_dawn.png"><div class="label"><span>v2_dawn 🌄</span><span class="badge b">구도 참고</span></div></div>
+  <div class="card"><img src="v2_rain.png"><div class="label"><span>v2_rain 🌧️</span></div></div>
+  <div class="card"><img src="v2_snow.png"><div class="label"><span>v2_snow ❄️</span></div></div>
+  <div class="card"><img src="v2_thunder.png"><div class="label"><span>v2_thunder ⛈️</span></div></div>
+</div>
+
+<h2>master — 중립 조명</h2>
+<div class="grid">
+  <div class="card"><img src="master_A.png"><div class="label"><span>master_A</span></div></div>
+  <div class="card"><img src="master_B.png"><div class="label"><span>master_B</span></div></div>
+  <div class="card"><img src="master_C.png"><div class="label"><span>master_C</span></div></div>
+</div>
+
+<h2 class="skip">seorak — 암반 시도 (후지산 느낌으로 기각)</h2>
+<div class="grid">
+  <div class="card skip"><img src="seorak_A.png"><div class="label"><span>seorak_A</span><span class="badge r">기각</span></div></div>
+  <div class="card skip"><img src="seorak_B.png"><div class="label"><span>seorak_B</span><span class="badge r">기각</span></div></div>
+  <div class="card skip"><img src="seorak_C.png"><div class="label"><span>seorak_C</span><span class="badge r">기각</span></div></div>
+</div>
+
+<h2 class="skip">v4 — 기각 (후지산 실루엣)</h2>
+<div class="grid">
+  <div class="card skip"><img src="v4_A.png"><div class="label"><span>v4_A</span><span class="badge r">기각</span></div></div>
+  <div class="card skip"><img src="v4_B.png"><div class="label"><span>v4_B</span><span class="badge r">기각</span></div></div>
+  <div class="card skip"><img src="v4_C.png"><div class="label"><span>v4_C</span><span class="badge r">기각</span></div></div>
+</div>
+
+<h2 class="skip">v5 / v6 — 기각 (건물 포함)</h2>
+<div class="grid">
+  <div class="card skip"><img src="v5_A.png"><div class="label"><span>v5_A</span><span class="badge r">기각</span></div></div>
+  <div class="card skip"><img src="v5_B.png"><div class="label"><span>v5_B</span><span class="badge r">기각</span></div></div>
+  <div class="card skip"><img src="v5_C.png"><div class="label"><span>v5_C</span><span class="badge r">기각</span></div></div>
+  <div class="card skip"><img src="v6_A.png"><div class="label"><span>v6_A</span><span class="badge r">기각</span></div></div>
+  <div class="card skip"><img src="v6_B.png"><div class="label"><span>v6_B</span><span class="badge r">기각</span></div></div>
+  <div class="card skip"><img src="v6_C.png"><div class="label"><span>v6_C</span><span class="badge r">기각</span></div></div>
+</div>
+
+</body>
+</html>
