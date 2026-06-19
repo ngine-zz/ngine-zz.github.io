@@ -29,57 +29,52 @@
     <div class="cloud-strip cloud-strip--1c"></div>
   </div>
 
-  <!-- 4a. 흰꽃 레이어 — 지형과 완전 분리, 화면 양 끝 고정, 좁은 화면 숨김 -->
-  <div class="white-flowers-layer">
-    <svg viewBox="0 0 400 172" preserveAspectRatio="none"
-         xmlns="http://www.w3.org/2000/svg">
-      <!-- 단순 흰꽃 (2×2) -->
-      @for (f of sceneWhiteFlowers; track $index) {
-        <rect class="flower-dot"
-              [attr.x]="f.x" [attr.y]="f.y - 2"
-              width="2" height="2"
-              [style.animation-delay.s]="f.d">
-        </rect>
-      }
-      <!-- 복합 꽃 (흰 꽃잎 3×3 + 노란 꽃술 1×1) -->
-      @for (f of sceneCompoundFlowers; track $index) {
-        <g class="flower-dot" [style.animation-delay.s]="f.d">
-          <rect [attr.x]="f.x - 1" [attr.y]="f.y - 2" width="3" height="3"
-                fill="rgba(249,244,235,0.92)"/>
-          <rect [attr.x]="f.x" [attr.y]="f.y - 1" width="1" height="1"
-                fill="#e4c94b"/>
-        </g>
-      }
-    </svg>
-  </div>
-
   <!-- 4b. 지형 (하단 고정, 원본 비율 유지 — 하늘 픽셀 투명 처리) -->
   <div class="landscape">
     <div class="season-tint" [style.background]="seasonTint()"></div>
 
-    <!-- 풀·꽃 바람 흔들림 SVG 오버레이 -->
-    <svg class="grass-overlay"
-         viewBox="0 0 400 172"
-         preserveAspectRatio="none"
-         xmlns="http://www.w3.org/2000/svg">
-      @for (b of sceneGrass; track $index) {
-        <rect class="blade"
-              [attr.x]="b.x" [attr.y]="b.y - b.h"
-              width="1" [attr.height]="b.h"
-              [style.animation-delay.s]="b.d">
-        </rect>
-      }
-      @for (f of sceneFlowers; track $index) {
-        <line class="flower-dot"
-              [attr.x1]="f.x" [attr.y1]="f.y"
-              [attr.x2]="f.x" [attr.y2]="f.y - 3"
-              [attr.stroke]="f.c"
-              stroke-width="1"
-              [style.animation-delay.s]="f.d">
-        </line>
-      }
-    </svg>
   </div>
+
+  <!-- 4b. 소 레이어 (z-index: 4 — 지형 위, 꽃 아래) -->
+  <div class="cow-adult-wrap">
+    <img class="cow-adult" src="/assets/intro-bg/cow/adult-north-west.png" alt="">
+  </div>
+  <div class="cow-calf-wrap">
+    <img class="cow-calf" [src]="calfFrameSrc()" alt="">
+  </div>
+  <div class="cow-calf-wrap cow-calf-wrap--far">
+    <img class="cow-calf cow-calf--far" [src]="calfFrameSrc2()" alt="">
+  </div>
+
+  <!-- 5. 노란 풀꽃 정적 베이스 -->
+  <div class="flowers-yellow-static"></div>
+
+  <!-- 5. 흰꽃 줄기/잎 레이어 좌측 — 정적 베이스 -->
+  <div class="flowers-left"></div>
+
+  <!-- 5. 흰꽃 줄기/잎 레이어 우측 — 정적 베이스 -->
+  <div class="flowers-right"></div>
+
+  <!-- 5. 흰 꽃잎/꽃술 + 노란 풀꽃 — 개별 스프라이트 흔들림 -->
+  <svg class="plant-sprites"
+       viewBox="0 0 400 172"
+       preserveAspectRatio="none"
+       xmlns="http://www.w3.org/2000/svg">
+    @for (sprite of plantSprites; track $index) {
+      <g class="plant-sprite"
+         [class.plant-sprite--animated]="sprite.animated"
+         [attr.data-kind]="sprite.kind"
+         [style.--sway]="sprite.sway"
+         [style.--lift]="sprite.lift"
+         [style.--rotate]="sprite.rotate"
+         [style.animation-delay]="sprite.delay"
+         [style.animation-duration]="sprite.duration">
+        @for (part of sprite.parts; track $index) {
+          <path [attr.fill]="part.fill" [attr.d]="part.d"></path>
+        }
+      </g>
+    }
+  </svg>
 
   <!-- 5. 비 -->
   @if (showRain()) {

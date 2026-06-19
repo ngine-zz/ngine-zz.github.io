@@ -10,6 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 |---|---|
 | `.omc/plans/project-overview.md` | 전체 프로젝트 구조 (메인 웹사이트 + Pixel Village 관계) |
 | `.omc/plans/ia-main-website.md` | 메인 웹사이트 IA (페이지 구조, 내비게이션) |
+| `.omc/plans/intro-screen-requirements.md` | 웹사이트 인트로 화면 기획 요구사항 |
 | `.omc/plans/ia-pixel-village.md` | Pixel Village IA (구역, 상호작용, 맵 구조) |
 | `.omc/plans/sfood-pixel-website.md` | Pixel Village 기술 기획 (아키텍처, 맵 사이즈 등) |
 | `.omc/plans/tech-stack.md` | 기술 스택 및 핵심 수치 |

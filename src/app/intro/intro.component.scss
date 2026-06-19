@@ -1,5 +1,13 @@
 // ============================================================
-// Layout
+// Layout — 레이어 z-index 구조
+//   1: 하늘 (sky)
+//   2: 별 (stars)
+//   3: 구름 (clouds)
+//   4: 산과 풍경 (landscape)
+//   5: 노란 풀꽃 + 흰꽃 줄기/잎 정적 베이스
+//   6: 흰 꽃잎/꽃술 + 일부 노란 풀꽃 스프라이트 (plant-sprites)
+//   8: 날씨 (rain / snow / lightning)
+//  10: 콘텐츠 (content)
 // ============================================================
 .scene {
   position: fixed;
@@ -24,6 +32,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
+  z-index: 3;
 }
 
 // ── 공통 스트립 설정 ──────────────────────────────────────
@@ -77,19 +86,20 @@
 }
 
 // ============================================================
-// Sky — 전체 화면 기반 레이어
-// 지형 이미지의 투명 픽셀(하늘 영역)을 통해 비쳐 보임
+// Sky — z-index: 1
 // ============================================================
 .sky {
   @extend %layer;
+  z-index: 1;
   transition: background 2s ease, filter 2s ease;
 }
 
 // ============================================================
-// Stars
+// Stars — z-index: 2
 // ============================================================
 .stars {
   @extend %layer;
+  z-index: 2;
 }
 
 .star {
@@ -128,36 +138,95 @@
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   pointer-events: none;
+  z-index: 4;
 }
 
-// 흰꽃 레이어 — landscape와 동일한 크기/위치, 독립 레이어
-.white-flowers-layer {
+.flowers-yellow-static {
   position: absolute;
   bottom: 0;
   left: 0;
+  width: 100%;
+  aspect-ratio: 400 / 172;
+  background-image: url('/assets/intro-bg/v10_AA_yellowflowers.png');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  pointer-events: none;
+  z-index: 5;
+}
+
+// 흰꽃 좌/우 레이어 — 원본 배경에서 분리한 투명 PNG 레이어
+// 지형과 같은 400×172 원본 비율 좌표계만 따른다.
+.flowers-left,
+.flowers-right {
+  position: absolute;
+  bottom: 0;
+  height: 43vw;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  pointer-events: none;
+}
+
+.flowers-left {
+  left: 0;
+  width: 30.75vw;
+  aspect-ratio: 123 / 172;
+  background-image: url('/assets/intro-bg/v10_AA_whiteflowers_left.png');
+  transform-origin: left bottom;
+  z-index: 5;
+}
+
+.flowers-right {
   right: 0;
+  width: 31.5vw;
+  aspect-ratio: 126 / 172;
+  background-image: url('/assets/intro-bg/v10_AA_whiteflowers_right.png');
+  transform-origin: right bottom;
+  z-index: 5;
+}
+
+.plant-sprites {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
   aspect-ratio: 400 / 172;
   pointer-events: none;
-  z-index: 2;
+  shape-rendering: crispEdges;
+  z-index: 6;
+}
 
-  svg {
-    width: 100%;
-    height: 100%;
-    image-rendering: pixelated;
+.plant-sprite {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  will-change: transform;
+}
+
+.plant-sprite--animated {
+  animation-name: petal-sway;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+@keyframes petal-sway {
+  0%, 100% {
+    transform: translateX(0) translateY(0) rotate(0);
   }
-
-  @media (max-width: 640px) {
-    display: none;
+  35% {
+    transform: translateX(var(--sway)) translateY(calc(var(--lift) * -1)) rotate(var(--rotate));
+  }
+  70% {
+    transform: translateX(calc(var(--sway) * -0.55)) translateY(calc(var(--lift) * -0.35)) rotate(calc(var(--rotate) * -0.55));
   }
 }
 
-.grass-overlay {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  image-rendering: pixelated;
+@media (prefers-reduced-motion: reduce) {
+  .plant-sprite--animated {
+    animation: none;
+  }
 }
 
 .season-tint {
@@ -165,35 +234,6 @@
   inset: 0;
   mix-blend-mode: multiply;
   transition: background 3s ease;
-}
-
-// 풀잎 — 1px 폭 rect, 수평 이동으로 흔들림
-.blade {
-  fill: #7a922b;
-  animation: sway-blade 4s ease-in-out infinite;
-}
-
-@keyframes sway-blade {
-  0%, 100% { transform: translateX(0); }
-  25%       { transform: translateX(1px); }
-  75%       { transform: translateX(-1px); }
-}
-
-// 꽃 공통 — stroke는 각 요소의 attribute로 제어
-.flower-dot {
-  fill: none;
-  animation: sway-flower 5s ease-in-out infinite;
-}
-
-// 흰꽃 레이어 전용 fill
-.white-flowers-layer rect {
-  fill: rgba(248, 244, 232, 0.9);
-}
-
-@keyframes sway-flower {
-  0%, 100% { transform: translateX(0); }
-  25%       { transform: translateX(1px); }
-  75%       { transform: translateX(-1px); }
 }
 
 // 계절 틴트 (SVG 내부, mix-blend-mode: multiply)
@@ -204,10 +244,61 @@
 }
 
 // ============================================================
-// Rain
+// 소 레이어 — z-index: 4 (지형 위, 꽃 아래)
+// 지면 기준: 43vw 높이의 landscape, 지면 y≈130/172 → bottom ≈ 10.5vw
+// 성체 소: 정지 (north-west 방향), 송아지: 풀 뜯기 애니메이션
+// ============================================================
+.cow-adult-wrap,
+.cow-calf-wrap {
+  position: absolute;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.cow-adult-wrap {
+  left: 52%;
+  bottom: 10vw;
+  z-index: 6;
+}
+
+.cow-adult {
+  display: block;
+  width: 7vw;
+  height: 7vw;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.cow-calf-wrap {
+  left: 57%;
+  bottom: 10.3vw;
+  z-index: 6;
+}
+
+.cow-calf {
+  display: block;
+  width: 5.5vw;
+  height: 5.5vw;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+
+  &--far {
+    width: 4vw;
+    height: 4vw;
+  }
+}
+
+.cow-calf-wrap--far {
+  left: 38%;
+  bottom: 12vw;
+}
+
+// ============================================================
+// Rain / Snow / Lightning — z-index: 8
 // ============================================================
 .rain {
   @extend %layer;
+  z-index: 8;
 }
 
 .drop {
@@ -231,6 +322,7 @@
 // ============================================================
 .snow {
   @extend %layer;
+  z-index: 8;
 }
 
 .flake {
@@ -253,6 +345,7 @@
 // ============================================================
 .lightning {
   @extend %layer;
+  z-index: 8;
   background: rgba(255, 255, 255, 0.95);
   opacity: 0;
   animation: flash 7s steps(1) infinite;
