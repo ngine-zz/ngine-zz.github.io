@@ -2,9 +2,12 @@
 
 ## 개요
 
-`src/app/intro/intro.component`는 S-Food 웹사이트의 진입 화면이다.
+`src/app/intro/intro.component`는 SFood 웹사이트의 진입 화면이다.
 원본 픽셀아트 이미지(`v10_AA.png`, 400×172px)를 레이어로 분해하여
 하늘·구름·지형·식물 애니메이션을 구현한다.
+
+기획 요구사항은 [`intro-screen-requirements.md`](intro-screen-requirements.md)에서 관리한다.
+이 문서는 레이어 구조, 에셋 처리, 좌표계, 애니메이션 방식 등 구현 상세만 다룬다.
 
 ---
 
@@ -17,12 +20,14 @@ DOM 순서(위→아래 = 앞→뒤):
 | 1 | `.sky` | CSS 단색 배경, 시간대별 색상 전환 |
 | 2 | `.stars` | 별 (밤·황혼만 표시) |
 | 3 | `.clouds-layer` | 구름 애니메이션 스트립 |
-| 4 | `.white-flowers-layer` | 흰꽃 SVG 독립 레이어 |
-| 5 | `.landscape` | 지형 PNG + 풀·꽃 SVG 오버레이 |
-| 6 | `.rain / .snow / .lightning` | 날씨 파티클 |
+| 4 | `.landscape` | 지형 PNG + 풀 SVG 오버레이 |
+| 5 | `.flowers-left` | 원본 배경에서 추출한 좌측 흰꽃 PNG 레이어, 브라우저 왼쪽 기준 |
+| 6 | `.flowers-right` | 원본 배경에서 추출한 우측 흰꽃 PNG 레이어, 브라우저 오른쪽 기준 |
+| 7 | `.rain / .snow / .lightning` | 날씨 파티클 |
 
-`.landscape`가 `.clouds-layer` 뒤에 위치하므로
-지형 PNG의 투명 하늘 영역을 통해 구름이 비쳐 보인다.
+Z-index 기준 `.landscape`가 `.clouds-layer` 위에 위치하여 구름이 지형을 덮지 않도록 한다.
+
+각 레이어는 `.scene` 안에서 독립 absolute 레이어로 배치한다. 하늘/구름은 하단 지형과 같은 transform에 묶지 않고, 지형/식물/날씨도 서로 다른 기준점과 애니메이션을 가진다.
 
 ---
 
@@ -31,6 +36,7 @@ DOM 순서(위→아래 = 앞→뒤):
 **파일:** `src/assets/intro-bg/v10_AA_terrain.png`
 
 원본 이미지에서 하늘 영역을 투명화하여 생성한다.
+흰꽃 묶음(흰/크림 꽃잎, 꽃에 붙은 짙은 녹색/연두색 줄기와 잎)은 `v10_AA_whiteflowers_left.png`, `v10_AA_whiteflowers_right.png` 투명 PNG 스프라이트 레이어로 분리하고 지형 PNG에서는 주변 잔디 패턴을 샘플링해 메운다. 노란꽃 계열과 어두운 배경색 계열은 흰꽃 스프라이트에서 제외한다.
 
 ### 2-1. 하늘 픽셀 투명화 (Flood-fill)
 
@@ -44,16 +50,18 @@ SKY = set()  # #d0f3f7, #daf0f6, #e3f4f9, #e7f1f3, #f1f7fa, #fafbfa
 단순 색상 비교가 아닌 **연결성(connectivity)** 기반으로 처리하여
 산 능선 근처의 경계선 아티팩트를 방지한다.
 
-### 2-2. 식물 픽셀 투명화
+### 2-2. 흰꽃 묶음 분리와 배경 메움
 
-풀잎·꽃·흰꽃 픽셀을 SVG 오버레이로 이관하면서 지형 PNG에서 제거한다.
+작은 점 SVG 오버레이는 사용하지 않는다.
+하단 전경의 좌우 가장자리 흰꽃 묶음을 좌우 PNG 레이어로 분리하고, 지형 PNG의 해당 자리는 주변 녹색 잔디 픽셀을 좌표 기반으로 샘플링해 메워 단색 패치처럼 보이지 않게 한다. 중앙의 노란 풀꽃과 잔디 사이 영역은 원본 지형을 유지한다.
 
-| 제거 색상 | 설명 |
+| 추출 색상/영역 | 설명 |
 |---|---|
 | `#e4e6d4`, `#f1ebdb`, `#f7f2e0`, `#f9f4eb`, `#ebefe6`, `#eaddc6` | 흰꽃 꽃잎 |
-| `#f9f4eb`, `#e7f1f3`, `#fafbfa`, `#f1f7fa` | Sky-like 잔여 픽셀 |
 | `#f2ecca`, `#dce7ed` | 크림색 꽃잎 2차 |
-| `#e4c94b`, `#dfc552` 등 (복합 꽃 위치만) | 노란 꽃술 |
+| `#dfcd6c`, `#e3c967`, `#e4c94b`, `#dfc552` 등 | 노란꽃 계열. 흰꽃 레이어에서 제외 |
+| `#1d3a44`, `#272b1f`, `#3c422b` 계열 | 어두운 배경색. 흰꽃 레이어에서 제외 |
+| 짙은 녹색/연두색 근접 픽셀 | 꽃에 붙은 줄기와 잎. 사각형 블럭이 보이지 않도록 꽃 주변 타원형/줄기형 마스크만 사용 |
 
 ---
 
@@ -120,77 +128,70 @@ cloud1-seamless: 374/400 × 100vw = 93.5vw → drift-1: translate(-93.5vw, -4vw)
 - CSS: `aspect-ratio: 400/172` → 높이 = `43vw`
 - 변환: `bottom = (172 - image_y) / 172 × 43vw`
 - 1 SVG unit = `100vw / 400 = 0.25vw`
+흰꽃은 지형과 같은 원본 좌표를 사용하고, 지형과 동일한 비율 스케일만 따른다. 별도 수평 spread나 transform 이동은 적용하지 않는다.
 
 ---
 
-## 5. 식물 바람 애니메이션
+## 5. 전경 식물 레이어
 
-### 5-1. SVG 오버레이 구조
+### 5-1. 레이어 구조
 
 ```html
 <div class="landscape">
-  <!-- 복합 꽃(흰꽃+노란꽃술) 전용 SVG -->
-  <svg class="grass-overlay" viewBox="0 0 400 172" preserveAspectRatio="none">
-    <g class="flower-dot" ...>
-      <rect fill="rgba(249,244,235,0.92)" .../>  <!-- 흰 꽃잎 3×3 -->
-      <rect fill="#e4c94b" .../>                 <!-- 노란 꽃술 1×1 -->
-    </g>
-  </svg>
-
-  <!-- 풀잎 + 노란꽃 + 흰꽃 SVG -->
-  <svg class="grass-overlay" viewBox="0 0 400 172" preserveAspectRatio="none">
-    <rect class="blade" .../>        <!-- 풀잎: width=1, height=h -->
-    <line class="flower-dot" .../>   <!-- 노란꽃: stroke 세로선 -->
-    <!-- 흰꽃은 white-flowers-layer에서 렌더링 -->
-  </svg>
+  <div class="season-tint"></div>
 </div>
 
-<!-- 흰꽃 독립 레이어 (landscape 외부) -->
-<div class="white-flowers-layer">
-  <svg viewBox="0 0 400 172" preserveAspectRatio="none">
-    <rect class="flower-dot" .../>  <!-- 2×2 흰꽃 -->
-  </svg>
-</div>
+<!-- 좌측 흰꽃 독립 PNG 레이어 (브라우저 왼쪽 기준) -->
+<div class="flowers-left"></div>
+
+<!-- 우측 흰꽃 독립 PNG 레이어 (브라우저 오른쪽 기준) -->
+<div class="flowers-right"></div>
 ```
 
 ### 5-2. 데이터 소스
 
-| 상수 | 요소 수 | 추출 방법 |
+| 산출물 | 기준 | 추출 방법 |
 |---|---|---|
-| `SCENE_GRASS` | 86 | 수동 추출 (픽셀 좌표) |
-| `SCENE_FLOWERS` | 51 | 수동 추출 (노란색 계열) |
-| `SCENE_WHITE_FLOWERS` | ~60 | Python 클러스터링, brightness>235 + 주변 녹색 + 가장자리(x<90 or x>300) |
-| `SCENE_COMPOUND_FLOWERS` | 8 | 노란 픽셀 주변 흰 픽셀 탐색 |
+| `v10_AA_whiteflowers_left.png` | 스크린샷 `2026-06-19 14.16.59` 계열의 좌측 하단 전경 흰꽃 군집 | `v10_AA.png` 하단 전경 좌측 가장자리 영역에서 흰/크림 꽃잎과 꽃술을 제외한 주변 짙은 녹색/연두색 줄기/잎 연결 마스크 |
+| `v10_AA_whiteflowers_right.png` | 스크린샷 `2026-06-19 14.17.05` 계열의 우측 하단 전경 흰꽃 군집 | `v10_AA.png` 하단 전경 우측 가장자리 영역에서 흰/크림 꽃잎과 꽃술을 제외한 주변 짙은 녹색/연두색 줄기/잎 연결 마스크 |
+| `v10_AA_yellowflowers.png` | 하단 전경의 노란 풀꽃 정적 베이스 | `v10_AA.png` 하단 전경 영역의 노란 꽃 픽셀 마스크 |
+| `plant-sprites.ts` | 흰 꽃잎/꽃술 + 일부 노란 풀꽃 조각 | 원본 픽셀 색상별 path 조각을 가진 SVG 스프라이트 데이터. 각 스프라이트는 서로 다른 delay/duration/amplitude를 가진다. |
+| `v10_AA_terrain.png` | 원본 지형에서 흰꽃 묶음과 노란 풀꽃이 제거된 배경 | 추출된 식물 픽셀 자리를 주변 잔디 패턴 샘플링으로 대체 |
 
-### 5-3. 애니메이션
+### 5-3. 식물 흔들림 레이어
 
-`rotateZ` 대신 `translateX` 사용 — SVG `transform-box` 의존성 없이 안정 동작:
-
-```scss
-@keyframes sway-blade {
-  0%, 100% { transform: translateX(0); }
-  25%       { transform: translateX(1px); }
-  75%       { transform: translateX(-1px); }
-}
-
-@keyframes sway-flower {
-  0%, 100% { transform: translateX(0); }
-  25%       { transform: translateX(1px); }
-  75%       { transform: translateX(-1px); }
-}
-```
-
-- 풀잎: 4s 사이클, 각 딜레이 0~2s
-- 꽃: 5s 사이클, 각 딜레이 0~2.5s
-- `alternate` 미사용 — 완전한 사이클 키프레임으로 끊김 없는 `infinite` 루프
+작은 점 꽃 SVG 레이어는 사용하지 않는다.
+흰꽃 줄기/잎과 노란 풀꽃 전체 형태는 PNG 베이스 레이어로 정지 상태를 유지한다.
+흰 꽃잎/꽃술과 하단 전경의 일부 노란 풀꽃 조각은 `plant-sprites.ts`의 SVG 스프라이트로 렌더링하고, 일부 스프라이트에만 `petal-sway` 흔들림 애니메이션을 적용한다.
+노란 풀꽃 전경선은 좌우가 높고 중앙이 낮으므로 단일 y값 대신 x 위치별 곡선형 하한선(`yellow_foreground_min_y`)으로 후보를 나눈다.
+언덕/중경의 노란 지형·풀꽃 영역은 흔들림 후보에서 제외한다.
+각 스프라이트는 생성 시점에 결정된 지연 시간, 지속 시간, 좌우 진폭, 상하 진폭, 회전각을 가진다.
+레이어 전체를 한꺼번에 움직이는 애니메이션은 사용하지 않는다.
+`prefers-reduced-motion: reduce` 환경에서는 식물 흔들림을 비활성화한다.
 
 ### 5-4. 흰꽃 레이어 반응형
 
-```scss
-.white-flowers-layer {
-  @media (max-width: 640px) { display: none; }
-}
+흰꽃은 원본 배경 이미지에서 픽셀을 추출한 투명 PNG를 좌/우 레이어로 분리하여 각각 브라우저 가장자리를 기준으로 배치한다.
+
 ```
+left image layer    = v10_AA_whiteflowers_left.png  (123×172px)
+right image layer   = v10_AA_whiteflowers_right.png (126×172px)
+layer height        = 43vw
+left layer width    = 43vw × 123 / 172 = 30.75vw
+right layer width   = 43vw × 126 / 172 = 31.5vw
+left anchor         = left: 0
+right anchor        = right: 0
+left position       = left: 0
+right position      = right: 0
+movement            = none
+```
+
+- 좌/우 PNG는 400×172 전체 투명 캔버스가 아니라 실제 흰꽃 가로 범위만 crop한 이미지여야 한다.
+- 좌측/우측 cropped PNG 레이어는 각각 브라우저 왼쪽/오른쪽에 붙인 상태로 지형과 같은 비율만 따른다.
+- 좁은 화면과 넓은 화면 모두 별도 좌우 이동을 적용하지 않는다.
+- 흰꽃 묶음 자체는 DOM 점으로 재작성하지 않고 원본 이미지 픽셀을 사용한다.
+- 흰꽃 배경 PNG 레이어의 반응형 위치는 `transform` 애니메이션이 아니라 `left/right` 위치값으로 조정한다.
+- 모바일 폭에서도 흰꽃 레이어를 숨기지 않는다. 겹침은 반응형 연출의 일부다.
 
 ---
 
@@ -224,14 +225,17 @@ cloud1-seamless: 374/400 × 100vw = 93.5vw → drift-1: translate(-93.5vw, -4vw)
 ```
 src/assets/intro-bg/
   v10_AA.png              원본 픽셀아트 (수정 금지)
-  v10_AA_terrain.png      하늘·식물 투명화 버전 (생성)
+  v10_AA_terrain.png      하늘 투명 + 식물 제거 자리 잔디 패턴 메움 버전 (생성)
+  v10_AA_whiteflowers_left.png   좌측 흰꽃 줄기/잎 정적 베이스 PNG
+  v10_AA_whiteflowers_right.png  우측 흰꽃 줄기/잎 정적 베이스 PNG
+  v10_AA_yellowflowers.png       노란 풀꽃 정적 베이스 투명 PNG
   cloud1.png              cloud1 스프라이트 (생성)
   cloud2.png              cloud2 스프라이트 (생성)
   cloud1-seamless.png     cloud1 심리스 타일 (생성)
   cloud2-seamless.png     cloud2 심리스 타일 (생성)
 ```
 
-**재생성 방법:** Python + Pillow 스크립트 (이 문서 §2, §3 참조)
+**재생성 방법:** `python3 scripts/extract_intro_white_flowers.py` 및 Python + Pillow 스크립트 (이 문서 §2, §3 참조). 이 스크립트는 `src/app/intro/plant-sprites.ts`도 함께 갱신한다.
 
 ---
 
@@ -239,4 +243,3 @@ src/assets/intro-bg/
 
 - `preserveAspectRatio="none"` 사용으로 SVG가 컨테이너 비율에 맞게 비균등 스케일될 수 있으나, `.landscape`가 `aspect-ratio: 400/172`를 유지하므로 실제로는 균등 스케일
 - 구름 `width: 300vw` 설정으로 DOM에서 뷰포트 밖 영역이 생성됨 — `overflow: hidden`이 `.scene`에 있으므로 시각적 영향 없음
-- `SCENE_WHITE_FLOWERS`의 중앙 위치(x=100~300)는 의도적으로 제외 — 지형 노이즈 픽셀과 구분 어려움
