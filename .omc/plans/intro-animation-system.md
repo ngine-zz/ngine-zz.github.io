@@ -15,17 +15,26 @@
 
 DOM 순서(위→아래 = 앞→뒤):
 
-| 레이어 | Element | 설명 |
+| z-index | Element | 설명 |
 |---|---|---|
 | 1 | `.sky` | CSS 단색 배경, 시간대별 색상 전환 |
 | 2 | `.stars` | 별 (밤·황혼만 표시) |
 | 3 | `.clouds-layer` | 구름 애니메이션 스트립 |
-| 4 | `.landscape` | 지형 PNG + 풀 SVG 오버레이 |
-| 5 | `.flowers-left` | 원본 배경에서 추출한 좌측 흰꽃 PNG 레이어, 브라우저 왼쪽 기준 |
-| 6 | `.flowers-right` | 원본 배경에서 추출한 우측 흰꽃 PNG 레이어, 브라우저 오른쪽 기준 |
-| 7 | `.rain / .snow / .lightning` | 날씨 파티클 |
+| 4 | `.landscape` | 지형 PNG |
+| 5 | `.flowers-yellow-static` | 노란 풀꽃 정적 PNG |
+| 6 | `.plant-sprites` | 흰 꽃잎/꽃술 SVG 스프라이트 |
+| 6 | `.cow-adult-wrap` | 어미 소 (NW 정지) |
+| 6 | `.cow-calf-wrap` (근거리/원거리) | 송아지 풀 뜯기 애니메이션 |
+| 6 | `.cow-sleeping-wrap` | 잠자는 소 SW z Z Z 애니메이션 |
+| 7 | `.cow-sitting-wrap` | 앉은 소 SE 정지 |
+| 8 | `.flowers-left` / `.flowers-right` | 좌·우 흰꽃 PNG 레이어 |
+| 8 | `.rain` / `.snow` / `.lightning` | 날씨 파티클 |
+| 9 | `.butterfly-stage` | 나비 시퀀스 |
+| 10 | `.content` | 브랜드 문구·CTA (현재 주석 처리) |
 
 Z-index 기준 `.landscape`가 `.clouds-layer` 위에 위치하여 구름이 지형을 덮지 않도록 한다.
+흰꽃 레이어(z-index 8)는 소 레이어(z-index 6~7) 위에 위치하여 전경 꽃이 소를 자연스럽게 가린다.
+나비(z-index 9)는 흰꽃·날씨 레이어 위에서 자유롭게 이동한다.
 
 각 레이어는 `.scene` 안에서 독립 absolute 레이어로 배치한다. 하늘/구름은 하단 지형과 같은 transform에 묶지 않고, 지형/식물/날씨도 서로 다른 기준점과 애니메이션을 가진다.
 
@@ -195,7 +204,55 @@ movement            = none
 
 ---
 
-## 6. 하늘·날씨 시스템
+## 6. 소·나비 레이어
+
+### 6-1. 소 레이어 구성
+
+| 요소 | 에셋 | 위치 | z-index | 설명 |
+|---|---|---|---|---|
+| 어미 소 | `cow/adult-north-west.png` | left 52%, bottom 10vw | 6 | 정지 이미지 |
+| 근거리 송아지 | `cow/calf-graze-south-east-{0..8}.png` | left 57%, bottom 10.3vw | 6 | 9프레임 풀 뜯기, 220ms 간격 |
+| 원거리 송아지 | `cow/calf-graze-north-west-{0..8}.png` | left 38%, bottom 12vw | 5 (하단 수정 필요) | 9프레임, 근거리와 4프레임 오프셋 |
+| 앉은 소 | `cow/sitting-cow-south-east.png` | left 31%, bottom 7.5vw | 7 | 정지 이미지 |
+| 잠자는 소 | `cow/sleeping-cow-sw-{0..8}.png` | left 73%, bottom 4vw | 6 | 9프레임 z Z Z 애니메이션, 200ms 간격, size 14vw |
+
+### 6-2. 잠자는 소 애니메이션
+
+PixelLab 오브젝트(ID: `4174afc9-13ce-499f-a12f-37ef0d8ac81a`)의 SW 방향 9프레임 애니메이션.
+소 머리 위로 z → Z → Z 텍스트가 점점 나타났다 사라지는 루프.
+
+```typescript
+sleepingCowTimer = setInterval(() => {
+  sleepingCowFrame.update(f => (f + 1) % 9);
+}, 200);
+```
+
+### 6-3. 나비 시퀀스
+
+PixelLab 오브젝트의 SW 방향 fly/sit 에셋 사용.
+
+**상태 머신:** `hidden → flying-in → sitting → flying-out → hidden → (반복)`
+
+| 상태 | 에셋 | 시간 | 설명 |
+|---|---|---|---|
+| `flying-in` | `butterfly/fly-sw-{0..8}.png` | 14s | 우측 화면 밖 → 착지점, 날개짓 50ms |
+| `sitting` | `butterfly/sit-sw.png` | 5s | 착지 직후·이륙 직전 각 450ms 날개짓 |
+| `flying-out` | `butterfly/fly-sw-{0..8}.png` | 6s | 착지점 → 좌측 화면 밖, 날개짓 50ms |
+| `hidden` | — | 5s | 다음 시퀀스 대기 |
+
+**착지점:** `left: 21.5%, bottom: 4.5vw` (z-index: 9)
+
+**sitting 날개짓 타이밍:**
+- 0ms: 날개짓 시작 (착지 settle)
+- 450ms: 정지 → `sit-sw.png`
+- 4550ms: 날개짓 재시작 (이륙 warmup, flying-out으로 자연 연결)
+- 5000ms: `flying-out` 전환
+
+**CSS 애니메이션:** `data-phase` 어트리뷰트 기반으로 Angular 컴포넌트 스타일에서 phase별 keyframe 적용.
+
+---
+
+## 7. 하늘·날씨 시스템
 
 ### 6-1. 하늘 색상
 
@@ -220,26 +277,39 @@ movement            = none
 
 ---
 
-## 7. 에셋 목록
+## 8. 에셋 목록
 
 ```
 src/assets/intro-bg/
-  v10_AA.png              원본 픽셀아트 (수정 금지)
-  v10_AA_terrain.png      하늘 투명 + 식물 제거 자리 잔디 패턴 메움 버전 (생성)
-  v10_AA_whiteflowers_left.png   좌측 흰꽃 줄기/잎 정적 베이스 PNG
-  v10_AA_whiteflowers_right.png  우측 흰꽃 줄기/잎 정적 베이스 PNG
-  v10_AA_yellowflowers.png       노란 풀꽃 정적 베이스 투명 PNG
-  cloud1.png              cloud1 스프라이트 (생성)
-  cloud2.png              cloud2 스프라이트 (생성)
-  cloud1-seamless.png     cloud1 심리스 타일 (생성)
-  cloud2-seamless.png     cloud2 심리스 타일 (생성)
+  v10_AA.png                       원본 픽셀아트 (수정 금지)
+  v10_AA_terrain.png               하늘 투명 + 식물 제거 자리 잔디 패턴 메움 버전
+  v10_AA_whiteflowers_left.png     좌측 흰꽃 줄기/잎 정적 베이스 PNG
+  v10_AA_whiteflowers_right.png    우측 흰꽃 줄기/잎 정적 베이스 PNG
+  v10_AA_yellowflowers.png         노란 풀꽃 정적 베이스 투명 PNG
+  cloud1.png                       cloud1 스프라이트
+  cloud1-seamless.png              cloud1 심리스 타일 (374×124px)
+  cloud2-seamless.png              cloud2 심리스 타일 (참고용, 미사용)
+
+  cow/
+    adult-north-west.png           어미 소 NW 정지
+    sitting-cow-south-east.png     앉은 소 SE 정지
+    calf-graze-south-east-{0..8}.png  근거리 송아지 풀 뜯기 9프레임
+    calf-graze-north-west-{0..8}.png  원거리 송아지 풀 뜯기 9프레임
+    sleeping-cow-south-west.png    잠자는 소 SW 정적 (참고용)
+    sleeping-cow-sw-{0..8}.png     잠자는 소 SW z Z Z 애니메이션 9프레임
+
+  butterfly/
+    fly-sw-{0..8}.png              나비 SW 날개짓 9프레임
+    sit-sw.png                     나비 SW 앉은 정지 이미지
 ```
+
+**소·나비 에셋 출처:** PixelLab (https://pixellab.ai) — MCP 도구로 다운로드.
 
 **재생성 방법:** `python3 scripts/extract_intro_white_flowers.py` 및 Python + Pillow 스크립트 (이 문서 §2, §3 참조). 이 스크립트는 `src/app/intro/plant-sprites.ts`도 함께 갱신한다.
 
 ---
 
-## 8. 알려진 제약
+## 9. 알려진 제약
 
 - `preserveAspectRatio="none"` 사용으로 SVG가 컨테이너 비율에 맞게 비균등 스케일될 수 있으나, `.landscape`가 `aspect-ratio: 400/172`를 유지하므로 실제로는 균등 스케일
 - 구름 `width: 300vw` 설정으로 DOM에서 뷰포트 밖 영역이 생성됨 — `overflow: hidden`이 `.scene`에 있으므로 시각적 영향 없음
