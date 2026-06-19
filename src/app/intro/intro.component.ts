@@ -191,7 +191,7 @@ export class IntroComponent implements OnInit, OnDestroy {
     clearInterval(this.butterflyFlyTimer);
     this.butterflyFlyTimer = setInterval(() => {
       this.butterflyFrame.update(f => (f + 1) % 9);
-    }, 80);
+    }, 50);
   }
 
   private stopWingFlap() {
