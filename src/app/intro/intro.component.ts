@@ -115,13 +115,15 @@ export class IntroComponent implements OnInit, OnDestroy {
   private calfTimer?: ReturnType<typeof setInterval>;
 
   // 나비 시퀀스
-  readonly butterflyPhase = signal<ButterflyPhase>('hidden');
-  readonly butterflyFrame = signal(0);
+  readonly butterflyPhase    = signal<ButterflyPhase>('hidden');
+  readonly butterflyFrame    = signal(0);
+  readonly sittingFlap       = signal(false);
   readonly butterflyFrameSrc = computed(() =>
     `/assets/intro-bg/butterfly/fly-sw-${this.butterflyFrame()}.png`
   );
   private butterflyFlyTimer?: ReturnType<typeof setInterval>;
   private butterflySeqTimer?: ReturnType<typeof setTimeout>;
+  private sittingIdleTimers: ReturnType<typeof setTimeout>[] = [];
 
   // Weather particles
   readonly rainDrops = Array.from({ length: 120 }, () => ({
@@ -164,6 +166,7 @@ export class IntroComponent implements OnInit, OnDestroy {
     clearInterval(this.calfTimer);
     clearInterval(this.butterflyFlyTimer);
     clearTimeout(this.butterflySeqTimer);
+    this.clearSittingIdle();
   }
 
   private runButterflySequence() {
@@ -173,8 +176,11 @@ export class IntroComponent implements OnInit, OnDestroy {
     this.butterflySeqTimer = setTimeout(() => {
       this.stopWingFlap();
       this.butterflyPhase.set('sitting');
+      this.startSittingIdle();
 
       this.butterflySeqTimer = setTimeout(() => {
+        this.clearSittingIdle();
+        this.sittingFlap.set(false);
         this.butterflyPhase.set('flying-out');
         this.startWingFlap();
 
@@ -196,6 +202,31 @@ export class IntroComponent implements OnInit, OnDestroy {
 
   private stopWingFlap() {
     clearInterval(this.butterflyFlyTimer);
+  }
+
+  private startSittingIdle() {
+    this.clearSittingIdle();
+
+    // 착지 직후: 바로 날개짓 → 450ms 후 정지
+    this.sittingFlap.set(true);
+    this.startWingFlap();
+    const t1 = setTimeout(() => {
+      this.stopWingFlap();
+      this.sittingFlap.set(false);
+    }, 450);
+    this.sittingIdleTimers.push(t1);
+
+    // 이륙 직전 450ms: 다시 날개짓 시작 (flying-out으로 자연스럽게 이어짐)
+    const t2 = setTimeout(() => {
+      this.sittingFlap.set(true);
+      this.startWingFlap();
+    }, 4550);
+    this.sittingIdleTimers.push(t2);
+  }
+
+  private clearSittingIdle() {
+    this.sittingIdleTimers.forEach(t => clearTimeout(t));
+    this.sittingIdleTimers = [];
   }
 
   private syncTime() {

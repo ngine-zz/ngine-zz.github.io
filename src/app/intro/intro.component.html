@@ -109,10 +109,9 @@
 
   <!-- 7. 나비 시퀀스 (z-index: 8) -->
   <div class="butterfly-stage" [attr.data-phase]="butterflyPhase()">
-    @if (butterflyPhase() !== 'sitting') {
+    @if (butterflyPhase() !== 'sitting' || sittingFlap()) {
       <img class="butterfly-img" [src]="butterflyFrameSrc()" alt="">
-    }
-    @if (butterflyPhase() === 'sitting') {
+    } @else {
       <img class="butterfly-img" src="/assets/intro-bg/butterfly/sit-sw.png" alt="">
     }
   </div>
