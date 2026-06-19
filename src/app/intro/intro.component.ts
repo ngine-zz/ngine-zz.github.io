@@ -1,9 +1,10 @@
 import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
 import { PLANT_SPRITES } from './plant-sprites';
 
-type TimeOfDay = 'dawn' | 'morning' | 'day' | 'golden' | 'sunset' | 'dusk' | 'night';
-type Season    = 'spring' | 'summer' | 'autumn' | 'winter';
-type Weather   = 'sunny' | 'cloudy' | 'rain' | 'heavy-rain' | 'snow' | 'thunder';
+type TimeOfDay      = 'dawn' | 'morning' | 'day' | 'golden' | 'sunset' | 'dusk' | 'night';
+type Season         = 'spring' | 'summer' | 'autumn' | 'winter';
+type Weather        = 'sunny' | 'cloudy' | 'rain' | 'heavy-rain' | 'snow' | 'thunder';
+type ButterflyPhase = 'hidden' | 'flying-in' | 'sitting' | 'flying-out';
 
 // 하늘 색상 — 이미지 실제 픽셀값 기반 단색
 // 낮: #d0f3f7 (이미지 하늘 원색), 시간대별 블렌딩
@@ -113,6 +114,15 @@ export class IntroComponent implements OnInit, OnDestroy {
   );
   private calfTimer?: ReturnType<typeof setInterval>;
 
+  // 나비 시퀀스
+  readonly butterflyPhase = signal<ButterflyPhase>('hidden');
+  readonly butterflyFrame = signal(0);
+  readonly butterflyFrameSrc = computed(() =>
+    `/assets/intro-bg/butterfly/fly-sw-${this.butterflyFrame()}.png`
+  );
+  private butterflyFlyTimer?: ReturnType<typeof setInterval>;
+  private butterflySeqTimer?: ReturnType<typeof setTimeout>;
+
   // Weather particles
   readonly rainDrops = Array.from({ length: 120 }, () => ({
     left:     Math.random() * 100,
@@ -146,11 +156,46 @@ export class IntroComponent implements OnInit, OnDestroy {
     this.calfTimer = setInterval(() => {
       this.calfWalkFrame.update(f => (f + 1) % 9);
     }, 220);
+    this.butterflySeqTimer = setTimeout(() => this.runButterflySequence(), 2000);
   }
 
   ngOnDestroy() {
     clearInterval(this.timer);
     clearInterval(this.calfTimer);
+    clearInterval(this.butterflyFlyTimer);
+    clearTimeout(this.butterflySeqTimer);
+  }
+
+  private runButterflySequence() {
+    this.butterflyPhase.set('flying-in');
+    this.startWingFlap();
+
+    this.butterflySeqTimer = setTimeout(() => {
+      this.stopWingFlap();
+      this.butterflyPhase.set('sitting');
+
+      this.butterflySeqTimer = setTimeout(() => {
+        this.butterflyPhase.set('flying-out');
+        this.startWingFlap();
+
+        this.butterflySeqTimer = setTimeout(() => {
+          this.stopWingFlap();
+          this.butterflyPhase.set('hidden');
+          this.butterflySeqTimer = setTimeout(() => this.runButterflySequence(), 5000);
+        }, 4000);
+      }, 5000);
+    }, 10000);
+  }
+
+  private startWingFlap() {
+    clearInterval(this.butterflyFlyTimer);
+    this.butterflyFlyTimer = setInterval(() => {
+      this.butterflyFrame.update(f => (f + 1) % 9);
+    }, 80);
+  }
+
+  private stopWingFlap() {
+    clearInterval(this.butterflyFlyTimer);
   }
 
   private syncTime() {

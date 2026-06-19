@@ -107,6 +107,16 @@
     </div>
   }
 
+  <!-- 7. 나비 시퀀스 (z-index: 8) -->
+  <div class="butterfly-stage" [attr.data-phase]="butterflyPhase()">
+    @if (butterflyPhase() !== 'sitting') {
+      <img class="butterfly-img" [src]="butterflyFrameSrc()" alt="">
+    }
+    @if (butterflyPhase() === 'sitting') {
+      <img class="butterfly-img" src="/assets/intro-bg/butterfly/sit-sw.png" alt="">
+    }
+  </div>
+
   <!-- 8. 번개 -->
   @if (showLightning()) {
     <div class="lightning"></div>
